@@ -2,6 +2,7 @@ package ru.sherman.bpi
 
 import java.util.Date
 import java.text.SimpleDateFormat
+import collection.mutable.ListBuffer
 
 /**
  * Created by IntelliJ IDEA.
@@ -35,14 +36,14 @@ object StatisticExtractor {
         val datePart = dateRegex.findFirstMatchIn(lines(0)).get.group(1);
 
         val statEltRegex = """<tr valign=top class=tr0><td align='right'>(\d+)</td><td><a class=nulink href=\"http://www.rts.ru/ru/forts/contract.html[?]isin=([^"]+)\">([^<]+)</a>&nbsp;</td><td>Futures</td><td align=center>(покупка|продажа)&nbsp;</td><td align=right nowrap>&nbsp;([^&]+)&nbsp;</td><td align=right nowrap>&nbsp;(\d+)&nbsp;</td><td align=right nowrap>&nbsp;([0-9]{2}):([0-9]{2}):([0-9]{2})&nbsp;</td></tr>""".r
-        var elts = List[StatElt]();
+        var elts = ListBuffer[StatElt]();
 
         val dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         for (elt <- lines) {
             for (m <- statEltRegex.findAllIn(elt).matchData) {
                 for (i <- 0 until m.groupCount) {
-                    elts = elts ::: List(new StatElt(
+                    elts += new StatElt(
                         m.subgroups(0) toInt,
                         m.subgroups(1),
                         m.subgroups(5) toInt,
@@ -54,7 +55,7 @@ object StatisticExtractor {
                         ),
                         extractOperation(m.subgroups(3)),
                         m.subgroups(4) replaceAll("""[ ]+""", "") toFloat
-                    ))
+                    )
                 }
             }
         }
