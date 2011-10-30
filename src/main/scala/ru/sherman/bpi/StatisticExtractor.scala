@@ -16,9 +16,10 @@ object Operation extends Enumeration {
     type Operation = Value
     val Buy, Sell = Value
 }
+
 import Operation._
 
-class StatElt(num: Int, symbol: String, quantity: Int,  date: Date, operation: Operation, price: Float) {
+class StatElt(num: Int, symbol: String, quantity: Int, date: Date, operation: Operation, price: Float) {
     override def toString: String = {
         num + "," + symbol + "," + quantity + "," + date + "," + operation + "," + price
     }
@@ -42,25 +43,23 @@ object StatisticExtractor {
 
         for (elt <- lines) {
             for (m <- statEltRegex.findAllIn(elt).matchData) {
-                for (i <- 0 until m.groupCount) {
-                    elts += new StatElt(
-                        m.subgroups(0) toInt,
-                        m.subgroups(1),
-                        m.subgroups(5) toInt,
-                        dateFormat.parse(
-                            datePart + " "
+                elts += new StatElt(
+                    m.subgroups(0) toInt,
+                    m.subgroups(1),
+                    m.subgroups(5) toInt,
+                    dateFormat.parse(
+                        datePart + " "
                             + m.subgroups(6) + ":"
                             + m.subgroups(7) + ":"
                             + m.subgroups(8)
-                        ),
-                        extractOperation(m.subgroups(3)),
-                        m.subgroups(4) replaceAll("""[ ]+""", "") toFloat
-                    )
-                }
+                    ),
+                    extractOperation(m.subgroups(3)),
+                    m.subgroups(4) replaceAll("""[ ]+""", "") toFloat
+                )
             }
         }
 
-        elts map println  _
+        elts map println _
 
     }
 
@@ -68,7 +67,7 @@ object StatisticExtractor {
         case "покупка" => Operation.Buy
         case "продажа" => Operation.Sell
         case _ => {
-            println ("unknown operation type")
+            println("unknown operation type")
             Operation.Buy
         }
     }
