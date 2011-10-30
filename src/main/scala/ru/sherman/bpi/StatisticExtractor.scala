@@ -70,7 +70,7 @@ object StatisticExtractor {
     }
 }
 
-class StatisticReader(fileName: String) = {
+class StatisticReader(fileName: String) {
     def getStatisticLines(): List[String] = {
         io.Source.fromURL(
             fileName,
