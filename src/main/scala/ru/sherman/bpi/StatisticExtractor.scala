@@ -36,7 +36,7 @@ object StatisticExtractor {
         val dateRegex = """<td align=right>Дата:</td><td width='100%' align=left>([0-9]{4}-[0-9]{2}-[0-9]{2})&nbsp;&nbsp;""".r
         val datePart = dateRegex.findFirstMatchIn(lines(0)).get.group(1);
 
-        val statEltRegex = """<tr valign=top class=tr(0|1)><td align='right'>(\d+)</td><td><a class=nulink href=\"http://www.rts.ru/ru/forts/contract.html[?]isin=([^"]+)\">([^<]+)</a>&nbsp;</td><td>Futures</td><td align=center>(покупка|продажа)&nbsp;</td><td align=right nowrap>&nbsp;([^&]+)&nbsp;</td><td align=right nowrap>&nbsp;(\d+)&nbsp;</td><td align=right nowrap>&nbsp;([0-9]{2}):([0-9]{2}):([0-9]{2})&nbsp;</td></tr>""".r
+        val statEltRegex = """<tr valign=top class=tr(0|1)><td align='right'>(\d+)</td><td><a class=nulink href=\"http://www.rts.ru/ru/forts/contract.html[?]isin=([^"]+)\">([^<]+)</a>&nbsp;</td><td>Futures</td><td align=center>(покупка|продажа)&nbsp;</td><td align=right nowrap>&nbsp;([^&]+)&nbsp;</td><td align=right nowrap>&nbsp;(-?\d+)&nbsp;</td><td align=right nowrap>&nbsp;([0-9]{2}):([0-9]{2}):([0-9]{2})&nbsp;</td></tr>""".r
         var elts = ListBuffer[StatElt]();
 
         val dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
