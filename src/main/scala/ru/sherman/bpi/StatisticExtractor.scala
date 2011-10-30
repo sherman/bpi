@@ -20,8 +20,10 @@ object Operation extends Enumeration {
 import Operation._
 
 class StatElt(num: Int, symbol: String, quantity: Int, date: Date, operation: Operation, price: Float) {
+    val dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     override def toString: String = {
-        num + "," + symbol + "," + quantity + "," + date + "," + operation + "," + price
+        num + "," + symbol + "," + quantity + "," + dateFormat.format(date)  + "," + operation + "," + price
     }
 }
 
