@@ -28,8 +28,7 @@ object StatisticExtractor {
         if (args.length < 2)
             throw new IllegalArgumentException("Not enough args!");
 
-
-        val lines = StatisticReader.read("http://investor.rts.ru/ru/statistics/2011/default.aspx?act=deals&nick=dr-mart&date=20111006")
+        val lines = StatisticReader.read("http://investor.rts.ru/ru/statistics/2011/default.aspx?act=deals&nick=" + args(0) + "&date=" + args(1))
 
         // extract date
         val dateRegex = """<td align=right>Дата:</td><td width='100%' align=left>([0-9]{4}-[0-9]{2}-[0-9]{2})&nbsp;&nbsp;""".r
