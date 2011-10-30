@@ -25,6 +25,10 @@ class StatElt(num: Int, symbol: String, quantity: Int,  date: Date, operation: O
 
 object StatisticExtractor {
     def main(args: Array[String]): Unit = {
+        if (args.length < 2)
+            throw new IllegalArgumentException("Not enough args!");
+
+
         val lines = StatisticReader.read("http://investor.rts.ru/ru/statistics/2011/default.aspx?act=deals&nick=dr-mart&date=20111006")
 
         // extract date
