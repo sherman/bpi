@@ -1,8 +1,8 @@
 package ru.sherman.bpi
 
-import java.util.Date
-import java.text.SimpleDateFormat
 import collection.mutable.ListBuffer
+import java.text.SimpleDateFormat
+import java.util.{Calendar, Date}
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,39 +29,62 @@ class StatElt(num: Int, symbol: String, quantity: Int, date: Date, operation: Op
 
 object StatisticExtractor {
     def main(args: Array[String]): Unit = {
+        val inputDateFormat = new SimpleDateFormat("yyyyMMdd");
+
         if (args.length < 2)
             throw new IllegalArgumentException("Not enough args!");
 
-        val lines = StatisticReader.read("http://investor.rts.ru/ru/statistics/2011/default.aspx?act=deals&nick=" + args(0) + "&date=" + args(1))
+        val dates = ListBuffer[String]()
 
-        // extract date
-        val dateRegex = """<td align=right>Дата:</td><td width='100%' align=left>([0-9]{4}-[0-9]{2}-[0-9]{2})&nbsp;&nbsp;""".r
-        val datePart = dateRegex.findFirstMatchIn(lines(0)).get.group(1);
+        // range given
+        if (args(1).contains("-")) {
+            val parts = args(1) split('-')
 
-        val statEltRegex = """<tr valign=top class=tr(0|1)><td align='right'>(\d+)</td><td><a class=nulink href=\"http://www.rts.ru/ru/forts/contract.html[?]isin=([^"]+)\">([^<]+)</a>&nbsp;</td><td>Futures</td><td align=center>(покупка|продажа)&nbsp;</td><td align=right nowrap>&nbsp;([^&]+)&nbsp;</td><td align=right nowrap>&nbsp;(-?\d+)&nbsp;</td><td align=right nowrap>&nbsp;([0-9]{2}):([0-9]{2}):([0-9]{2})&nbsp;</td></tr>""".r
-        var elts = ListBuffer[StatElt]();
+            val calendar = Calendar.getInstance();
+            var currDate = parts(0)
+            while (!currDate.equals(parts(1))) {
+                calendar.setTime(inputDateFormat.parse(currDate))
+                calendar.add(Calendar.DATE, 1)
+                currDate = inputDateFormat.format(calendar getTime)
+                dates += currDate
+            }
+        } else
+            dates += args(1)
 
-        val dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        for (date <- dates) {
+            val lines = StatisticReader.read("http://investor.rts.ru/ru/statistics/2011/default.aspx?act=deals&nick=" + args(0) + "&date=" + date)
 
-        for (elt <- lines) {
-            for (m <- statEltRegex.findAllIn(elt).matchData) {
-                elts += new StatElt(
-                    m.subgroups(1) toInt,
-                    m.subgroups(2),
-                    m.subgroups(6) toInt,
-                    dateFormat.parse(
-                        datePart + " "
-                            + m.subgroups(7) + ":"
-                            + m.subgroups(8) + ":"
-                            + m.subgroups(9)
-                    ),
-                    extractOperation(m.subgroups(4)),
-                    m.subgroups(5) replaceAll("""[ ]+""", "") toFloat
-                )
+            if (!lines.isEmpty) {
+                // extract date
+                val dateRegex = """<td align=right>Дата:</td><td width='100%' align=left>([0-9]{4}-[0-9]{2}-[0-9]{2})&nbsp;&nbsp;""".r
+                val datePart = dateRegex.findFirstMatchIn(lines(0)).get.group(1);
+
+                val statEltRegex = """<tr valign=top class=tr(0|1)><td align='right'>(\d+)</td><td><a class=nulink href=\"http://www.rts.ru/ru/forts/contract.html[?]isin=([^"]+)\">([^<]+)</a>&nbsp;</td><td>Futures</td><td align=center>(покупка|продажа)&nbsp;</td><td align=right nowrap>&nbsp;([^&]+)&nbsp;</td><td align=right nowrap>&nbsp;(-?\d+)&nbsp;</td><td align=right nowrap>&nbsp;([0-9]{2}):([0-9]{2}):([0-9]{2})&nbsp;</td></tr>""".r
+                var elts = ListBuffer[StatElt]();
+
+                val dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+                for (elt <- lines) {
+                    for (m <- statEltRegex.findAllIn(elt).matchData) {
+                        elts += new StatElt(
+                            m.subgroups(1) toInt,
+                            m.subgroups(2),
+                            m.subgroups(6) toInt,
+                            dateFormat.parse(
+                                datePart + " "
+                                    + m.subgroups(7) + ":"
+                                    + m.subgroups(8) + ":"
+                                    + m.subgroups(9)
+                            ),
+                            extractOperation(m.subgroups(4)),
+                            m.subgroups(5) replaceAll("""[ ]+""", "") toFloat
+                        )
+                    }
+                }
+
+                elts map println _
             }
         }
-
-        elts map println _
 
     }
 
